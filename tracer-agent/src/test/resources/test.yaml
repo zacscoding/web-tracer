@@ -1,0 +1,10 @@
+!!com.zaccoding.tracer.agent.ProxyConfigurer
+classes:
+- className: com/zaccoding
+  invokeType: startsWith
+  invoker: true
+  methodProxies:
+  - {displayException: false, displayExecutionTime: false, displayParamAndReturn: true,
+    invokeType: contains, invoker: false, methodName: index}
+  - {displayException: false, displayExecutionTime: false, displayParamAndReturn: true,
+    invokeType: startsWith, invoker: false, methodName: proxy}

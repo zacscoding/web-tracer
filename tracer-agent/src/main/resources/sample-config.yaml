@@ -1,0 +1,7 @@
+!!com.zaccoding.tracer.agent.ProxyConfigurer
+classes:
+- className: org.zaccoding
+  invokeType: startsWith
+  invoker: true
+  methodProxyList:
+  - {invokeType: contains, invoker: true, methodName: '*'}

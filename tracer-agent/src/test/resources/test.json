@@ -1,0 +1,27 @@
+{
+  "classProxies": [
+    {
+      "className": "com/zaccoding",
+      "invokeType": "startsWith",
+      "isInvoker": true,
+      "methodProxies": [
+        {
+          "methodName": "index",
+          "invokeType": "contains",
+          "isInvoker": false,
+          "displayParamAndReturn": true,
+          "displayExecutionTime": false,
+          "displayException": false
+        },
+        {
+          "methodName": "proxy",
+          "invokeType": "startsWith",
+          "isInvoker": false,
+          "displayParamAndReturn": true,
+          "displayExecutionTime": false,
+          "displayException": false
+        }
+      ]
+    }
+  ]
+}
