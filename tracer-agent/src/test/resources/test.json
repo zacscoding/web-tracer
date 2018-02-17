@@ -10,16 +10,14 @@
           "invokeType": "contains",
           "isInvoker": false,
           "displayParamAndReturn": true,
-          "displayExecutionTime": false,
-          "displayException": false
+          "displayExecutionTime": false
         },
         {
           "methodName": "proxy",
           "invokeType": "startsWith",
           "isInvoker": false,
           "displayParamAndReturn": true,
-          "displayExecutionTime": false,
-          "displayException": false
+          "displayExecutionTime": false
         }
       ]
     }

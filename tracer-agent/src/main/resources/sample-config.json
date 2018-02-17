@@ -1,0 +1,21 @@
+{
+  "class-proxies": [
+    {
+      // check class name
+      "class-name": "com/zaccoding/controller/FrontController",
+      // check class type [startsWith, endsWith, equals, contains]
+      "invoke-type": "equals",
+      // return class-name.invoke(origin-class-name);
+      "is-invoker": true,
+      "method-proxies": [
+        {
+          "method-name": "*",
+          "invoke-type": "",
+          "is-invoker": false,
+          "display-param-and-return": true,
+          "display-execution-time": true
+        }
+      ]
+    }
+  ]
+}

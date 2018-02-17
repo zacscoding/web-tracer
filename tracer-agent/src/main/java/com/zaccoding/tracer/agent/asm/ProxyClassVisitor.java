@@ -1,6 +1,7 @@
 package com.zaccoding.tracer.agent.asm;
 
 import com.zaccoding.tracer.agent.ProxyConfigurer;
+import com.zaccoding.tracer.agent.ProxyConfigurer.MethodProxy;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -14,46 +15,47 @@ import java.util.List;
  * @GitHub : https://github.com/zacscoding
  */
 public class ProxyClassVisitor extends ClassVisitor implements Opcodes {
-    private ProxyConfigurer.ClassProxy classConfig;
-    private boolean isAll = false;
 
-    public ProxyClassVisitor(ClassVisitor cv, ProxyConfigurer.ClassProxy classConfig) {
+    private ProxyConfigurer.ClassProxy classConfig;
+    private ProxyConfigurer.MethodProxy defaultMethodProxy;
+    private boolean isAll = false;
+    private String className;
+
+    public ProxyClassVisitor(ClassVisitor cv, String className, ProxyConfigurer.ClassProxy classConfig) {
         super(ASM5, cv);
+        this.className = className;
         this.classConfig = classConfig;
         List<ProxyConfigurer.MethodProxy> methodProxies = classConfig.getMethodProxies();
-        if(methodProxies == null || methodProxies.size() == 0 ||
-                (methodProxies.size() == 1 ) && methodProxies.get(0).getMethodName().equals("*") ) {
+        if (methodProxies == null || methodProxies.size() == 0 ||
+            (methodProxies.size() == 1) && methodProxies.get(0).getMethodName().equals("*")) {
             isAll = true;
+            defaultMethodProxy = new ProxyConfigurer.MethodProxy();
+            defaultMethodProxy.setDisplayExecutionTime(true);
+            defaultMethodProxy.setDisplayParamAndReturn(true);
         }
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        System.out.println("name : " + name + ", desc : " + desc);
-        MethodVisitor mv = super.visitMethod(access,name,desc,signature,exceptions);
-        if(mv == null) {
+        MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
+        if (mv == null) {
             return mv;
         }
 
-//        ProxyConfigurer.MethodProxy methodProxy = classConfig.getMethodProxy(name);
-//        if(isAll) {
-//            return new ProxyMethodVisitor(access,desc,mv);
-//        }
-//        else {
-//            // find method target
-//        }
-
+        ProxyConfigurer.MethodProxy methodProxy = null;
+        if ("<init>".equals(name)) {
+            return mv;
+        } else if (isAll) {
+            return new ProxyMethodVisitor(access, desc, mv, getMethodId(className, name, desc), defaultMethodProxy);
+        } else if ((methodProxy = classConfig.getMethodProxy(name)) != null) {
+            return new ProxyMethodVisitor(access, desc, mv, getMethodId(className, name, desc), methodProxy);
+        }
         return mv;
     }
-}
 
-class ProxyMethodVisitor extends LocalVariablesSorter implements org.objectweb.asm.Opcodes {
-    protected ProxyMethodVisitor(int access, String desc, MethodVisitor mv) {
-        super(ASM5, access, desc, mv);
+    private String getMethodId(String className, String methodName, String methodDesc) {
+        StringBuilder sb = new StringBuilder(className.length() + methodName.length() + methodDesc.length() + 2);
+        return sb.append(className).append("::").append(methodName).append(methodDesc).toString();
     }
 
-    @Override
-    public void visitCode() {
-        mv.visitCode();
-    }
 }

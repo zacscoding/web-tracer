@@ -10,6 +10,7 @@ import java.util.List;
  * @GitHub : https://github.com/zacscoding
  */
 public class ProxyConfigurer {
+
     private List<ClassProxy> classProxies;
 
     public List<ClassProxy> getClasses() {
@@ -21,12 +22,12 @@ public class ProxyConfigurer {
     }
 
     public ClassProxy getClassProxy(String className) {
-        if(classProxies == null || classProxies.size() == 0) {
+        if (classProxies == null || classProxies.size() == 0) {
             return null;
         }
 
-        for(ClassProxy classProxy : classProxies) {
-            if(StringInvokeUtil.isMatches(classProxy.getClassName(), className, classProxy.invokeType, classProxy.isInvoker)) {
+        for (ClassProxy classProxy : classProxies) {
+            if (StringInvokeUtil.isMatches(classProxy.getClassName(), className, classProxy.invokeType, classProxy.isInvoker)) {
                 return classProxy;
             }
         }
@@ -36,11 +37,15 @@ public class ProxyConfigurer {
 
 
     public static class ClassProxy {
+
         private String className;
         private StringInvokeUtil.InvokeType invokeType;
         private boolean isInvoker;
         private List<MethodProxy> methodProxies;
-        public ClassProxy(){}
+
+        public ClassProxy() {
+        }
+
         public ClassProxy(String className, StringInvokeUtil.InvokeType invokeType, boolean isInvoker, List<MethodProxy> methodProxies) {
             this.className = className;
             this.invokeType = invokeType;
@@ -49,12 +54,12 @@ public class ProxyConfigurer {
         }
 
         public MethodProxy getMethodProxy(String methodName) {
-            if(methodProxies == null || methodProxies.size() == 0) {
+            if (methodProxies == null || methodProxies.size() == 0) {
                 return null;
             }
 
-            for(MethodProxy methodProxy : methodProxies) {
-                if(StringInvokeUtil.isMatches(methodProxy.getMethodName(), methodName, methodProxy.invokeType, methodProxy.isInvoker)) {
+            for (MethodProxy methodProxy : methodProxies) {
+                if (StringInvokeUtil.isMatches(methodProxy.getMethodName(), methodName, methodProxy.invokeType, methodProxy.isInvoker)) {
                     return methodProxy;
                 }
             }
@@ -65,38 +70,47 @@ public class ProxyConfigurer {
         public String getClassName() {
             return className;
         }
+
         public void setClassName(String className) {
             this.className = className;
         }
+
         public StringInvokeUtil.InvokeType getInvokeType() {
             return invokeType;
         }
+
         public void setInvokeType(StringInvokeUtil.InvokeType invokeType) {
             this.invokeType = invokeType;
         }
+
         public boolean isInvoker() {
             return isInvoker;
         }
+
         public void setInvoker(boolean invoker) {
             isInvoker = invoker;
         }
+
         public List<MethodProxy> getMethodProxies() {
             return methodProxies;
         }
+
         public void setMethodProxies(List<MethodProxy> methodProxyList) {
             this.methodProxies = methodProxyList;
         }
     }
 
     public static class MethodProxy {
+
         private String methodName;
         private StringInvokeUtil.InvokeType invokeType;
         private boolean isInvoker;
         private boolean displayParamAndReturn = true;
         private boolean displayExecutionTime = false;
-        private boolean displayException = false;
 
-        public MethodProxy() {}
+        public MethodProxy() {
+        }
+
         public MethodProxy(String methodName, StringInvokeUtil.InvokeType invokeType, boolean isInvoker) {
             this.methodName = methodName;
             this.invokeType = invokeType;
@@ -141,14 +155,6 @@ public class ProxyConfigurer {
 
         public void setDisplayExecutionTime(boolean displayExecutionTime) {
             this.displayExecutionTime = displayExecutionTime;
-        }
-
-        public boolean isDisplayException() {
-            return displayException;
-        }
-
-        public void setDisplayException(boolean displayException) {
-            this.displayException = displayException;
         }
     }
 }
