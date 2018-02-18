@@ -21,6 +21,7 @@ public class MethodContext {
     // exist exception
     private boolean existException;
     private int paramCnt = 0;
+    private int deps;
 
     public int getParamCntAndInc() {
         return ++paramCnt;
@@ -82,5 +83,13 @@ public class MethodContext {
 
     public void setExistException(boolean existException) {
         this.existException = existException;
+    }
+
+    public int getDeps() {
+        return deps;
+    }
+
+    public void setDeps(int deps) {
+        this.deps = deps;
     }
 }

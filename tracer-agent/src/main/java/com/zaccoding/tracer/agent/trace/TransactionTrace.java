@@ -2,6 +2,7 @@ package com.zaccoding.tracer.agent.trace;
 
 import com.zaccoding.tracer.agent.CustomObjectParser;
 import com.zaccoding.tracer.agent.LOGGER;
+import com.zaccoding.tracer.agent.trace.tree.SimpleNode;
 import java.util.List;
 import java.util.Stack;
 
@@ -20,7 +21,7 @@ public class TransactionTrace {
         }
 
         System.out.println("@@TransactionTrace::startTransaction is called");
-        ctx.traceMethod(new MethodContext(id));
+        ctx.startMethod(new MethodContext(id));
     }
 
     public static void appendParam(Object value) {
@@ -30,7 +31,7 @@ public class TransactionTrace {
             return;
         }
 
-        MethodContext methodCtx = ctx.getLastTraceMethod();
+        MethodContext methodCtx = ctx.getCurrentMethod();
         if (methodCtx == null) {
             LOGGER.println("[ERROR] called getLastTraceMethod. but there is no MethodContext");
             return;
@@ -44,26 +45,32 @@ public class TransactionTrace {
     public static void appendReturnValue(Object value, long executeTime) {
         TransactionContext ctx = TransactionManager.startTrasaction();
         if (ctx == null) {
-            LOGGER.println("[ERROR] called startTransaction. but there is no TransactionContext");
+            System.out.println("[ERROR] called startTransaction. but there is no TransactionContext");
             return;
         }
 
-        MethodContext methodCtx = ctx.removeLastTraceMethod();
+        MethodContext methodCtx = ctx.endMethod();
         if (methodCtx == null) {
-            LOGGER.println("[ERROR] called getLastTraceMethod. but there is no MethodContext");
+            System.out.println("[ERROR] called getLastTraceMethod. but there is no MethodContext");
             return;
         }
+        System.out.println("1");
         System.out.println("@@TransactionTrace::appendReturnValue is called");
+        System.out.println("2");
+        if (value == null) {
+            System.out.println("value is null");
+        } else {
+            System.out.println("value is not null");
+            System.out.println(value.toString());
+        }
+        System.out.println(value);
 
         // set return value & execute time
         methodCtx.setReturnValue(parseReturnValue(value));
         methodCtx.setExcuteTime(executeTime);
 
-        // push complete trace
-        ctx.push(methodCtx);
-
         // check complete all
-        if (ctx.getTraceMethods().size() == 0) {
+        if (!ctx.hasTraceMethod()) {
             endTrasaction();
         }
     }
@@ -77,36 +84,48 @@ public class TransactionTrace {
         System.out.println("@@TransactionTrace::endTrasaction is called");
 
         StringBuilder sb = new StringBuilder();
-        Stack<MethodContext> methods = ctx.getCollectedMethods();
-        if (methods == null || methods.size() == 0) {
-            LOGGER.println("[ERROR] there is no traced method stack");
+        SimpleNode<MethodContext> root = ctx.getRootNode();
+        if (root == null) {
+            LOGGER.println("[ERROR] there is no root node in method tree");
             return;
         }
 
         final String newLine = System.getProperty("line.separator");
-        int idx = 0;
-
-        while (!methods.isEmpty()) {
-            String deps = "";
-            // append deps
-            for (int j = 0; j < idx; j++) {
-                deps += "  ";
-            }
-
-            MethodContext methodContext = methods.pop();
-            sb.append(deps).append(methodContext.getId()).append("[").append(methodContext.getExcuteTime()).append("ms] : ").append(methodContext.getReturnValue()).append(newLine);
-            List<String> params = methodContext.getParams();
-            if (params != null && params.size() > 0) {
-                for (String param : params) {
-                    sb.append(deps).append(param).append(newLine);
-                }
-            }
-            idx++;
-        }
+        prefixTraversal(sb, root, newLine);
 
         // temp :: System.out.println
         System.out.println(sb.toString());
         //LOGGER.println(sb.toString());
+    }
+
+    private static void prefixTraversal(StringBuilder sb, SimpleNode<MethodContext> methodNode, String newLine) {
+        if (methodNode == null || sb == null) {
+            return;
+        }
+
+        int deps = methodNode.getDeps();
+        String depsVal = "";
+        // append deps
+        for (int i = 0; i < deps; i++) {
+            depsVal += "  ";
+        }
+
+        MethodContext methodContext = methodNode.getData();
+        sb.append(depsVal).append(methodContext.getId()).append("[").append(methodContext.getExcuteTime()).append("ms] : ").append(methodContext.getReturnValue()).append(newLine);
+        List<String> params = methodContext.getParams();
+        if (params != null && params.size() > 0) {
+            for (String param : params) {
+                sb.append(depsVal).append(param).append(newLine);
+            }
+        }
+
+        // traversal child
+        List<SimpleNode<MethodContext>> childs = methodNode.getChildren();
+        if (childs != null) {
+            for (SimpleNode<MethodContext> child : childs) {
+                prefixTraversal(sb, child, newLine);
+            }
+        }
     }
 
     private static String parseParam(int idx, Object value) {

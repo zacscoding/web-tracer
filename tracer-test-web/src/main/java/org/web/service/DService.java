@@ -8,9 +8,10 @@ import org.springframework.stereotype.Service;
  * @GitHub : https://github.com/zacscoding
  */
 @Service
-public class TempService {
+public class DService {
 
-    public String append(String name, int age) {
-        return name + age;
+    public int methodD(int val) {
+        return val;
     }
+
 }

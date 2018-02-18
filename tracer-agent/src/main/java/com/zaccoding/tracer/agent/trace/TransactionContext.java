@@ -1,5 +1,8 @@
 package com.zaccoding.tracer.agent.trace;
 
+import com.zaccoding.tracer.agent.trace.tree.SimpleNode;
+import com.zaccoding.tracer.agent.trace.tree.SimpleTree;
+import com.zaccoding.tracer.agent.trace.tree.SimpleTreeImpl;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -11,75 +14,61 @@ import java.util.Stack;
  */
 public class TransactionContext {
 
-    // complete method contexts
-    private Stack<MethodContext> collectedMethods;
-    // tracing method contexts
-    private List<MethodContext> traceMethods;
+    private SimpleTree<MethodContext> methodTree;
 
-    /**
-     * push complete method context
-     */
-    public void push(MethodContext methodContext) {
-        if (methodContext == null) {
-            return;
-        }
-
-        if (collectedMethods == null) {
-            collectedMethods = new Stack<MethodContext>();
-        }
-
-        collectedMethods.push(methodContext);
+    public TransactionContext() {
+        this.methodTree = new SimpleTreeImpl<MethodContext>();
     }
 
     /**
-     * add trace method context
+     * start method call
      */
-    public void traceMethod(MethodContext methodContext) {
-        if (traceMethods == null) {
-            traceMethods = new LinkedList<MethodContext>();
+    public void startMethod(MethodContext methodContext) {
+        if (methodTree == null) {
+            methodTree = new SimpleTreeImpl<MethodContext>();
         }
 
-        traceMethods.add(methodContext);
+        methodTree.add(methodContext);
     }
 
     /**
-     * get last trace context or null
+     * get current method
      */
-    public MethodContext getLastTraceMethod() {
-        if (traceMethods == null || traceMethods.size() == 0) {
-            return null;
+    public MethodContext getCurrentMethod() {
+        if (methodTree != null) {
+            return methodTree.getCurrentData();
         }
 
-        return traceMethods.get(traceMethods.size() - 1);
+        return null;
     }
 
     /**
-     * remove last trace context or null & remote it
+     * get current method & complete this method
      */
-    public MethodContext removeLastTraceMethod() {
-        if (traceMethods == null || traceMethods.size() == 0) {
-            return null;
+    public MethodContext endMethod() {
+        MethodContext methodCtx = null;
+
+        if (methodTree != null) {
+            methodCtx = methodTree.getCurrentData();
+            methodTree.complete();
         }
 
-        return traceMethods.remove(traceMethods.size() - 1);
+        return methodCtx;
     }
 
-    // =================================
-    // Getters, Setters
-    // =================================
-    public Stack<MethodContext> getCollectedMethods() {
-        return collectedMethods;
+    /**
+     * check remain tracing method context
+     */
+    public boolean hasTraceMethod() {
+        if (methodTree != null) {
+            return methodTree.getCurrentNode() != null;
+        }
+
+        return true;
     }
 
-    public void setCollectedMethods(Stack<MethodContext> collectedMethods) {
-        this.collectedMethods = collectedMethods;
+    public SimpleNode<MethodContext> getRootNode() {
+        return methodTree == null ? null : methodTree.getRoot();
     }
 
-    public List<MethodContext> getTraceMethods() {
-        return traceMethods;
-    }
-
-    public void setTraceMethods(List<MethodContext> traceMethods) {
-        this.traceMethods = traceMethods;
-    }
 }

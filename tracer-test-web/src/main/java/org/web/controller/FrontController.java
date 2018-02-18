@@ -1,9 +1,10 @@
 package org.web.controller;
 
-import org.web.service.TempService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.web.service.AService;
+import org.web.service.EService;
 
 /**
  * @author zacconding
@@ -14,11 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class FrontController {
 
     @Autowired
-    private TempService tempService;
+    private AService aService;
+    @Autowired
+    private EService eService;
 
     @GetMapping("/index")
     public String index() {
-        tempService.append("Test", 10);
+        aService.methodA("Test", 10);
+        eService.methodE();
         return "Test Web APP";
     }
 }
