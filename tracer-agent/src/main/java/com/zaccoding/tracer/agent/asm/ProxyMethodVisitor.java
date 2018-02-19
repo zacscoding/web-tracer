@@ -2,6 +2,7 @@ package com.zaccoding.tracer.agent.asm;
 
 import com.zaccoding.tracer.agent.ProxyConfigurer;
 import com.zaccoding.tracer.agent.trace.TransactionTrace;
+import com.zaccoding.tracer.util.OpcodesUtil;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -9,8 +10,6 @@ import org.objectweb.asm.commons.LocalVariablesSorter;
 
 /**
  * @author zacconding
- * @Date 2018-02-18
- * @GitHub : https://github.com/zacscoding
  */
 public class ProxyMethodVisitor extends LocalVariablesSorter implements org.objectweb.asm.Opcodes {
 
@@ -42,9 +41,14 @@ public class ProxyMethodVisitor extends LocalVariablesSorter implements org.obje
     public void visitInsn(int opcode) {
         if ((opcode >= IRETURN && opcode <= RETURN)) {
             if (opcode == RETURN) {
-                mv.visitInsn(ACONST_NULL);
+                mv.visitLdcInsn("void");
             } else {
                 mv.visitInsn(DUP);
+                Type returnType = Type.getReturnType(desc);
+                String wrapper = OpcodesUtil.getWrapperClass(returnType.getSort());
+                if (wrapper != null) {
+                    mv.visitMethodInsn(INVOKESTATIC, wrapper, "valueOf", "(" + returnType.getDescriptor() + ")L" + wrapper + ";", false);
+                }
             }
             mv.visitInsn(LCONST_0);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, trace, "appendReturnValue", "(Ljava/lang/Object;J)V", false);
@@ -57,47 +61,11 @@ public class ProxyMethodVisitor extends LocalVariablesSorter implements org.obje
         if (params != null && params.length > 0) {
             for (int i = 0; i < params.length; i++) {
                 int idx = i + 1;
-                String wrapper = null;
-                int opcodes = -1;
-                switch (params[i].getSort()) {
-                    case Type.BOOLEAN:
-                        wrapper = "java/lang/Boolean";
-                        opcodes = ILOAD;
-                        break;
-                    case Type.BYTE:
-                        wrapper = "java/lang/Byte";
-                        opcodes = ILOAD;
-                        break;
-                    case Type.SHORT:
-                        wrapper = "java/lang/Short";
-                        opcodes = ILOAD;
-                        break;
-                    case Type.CHAR:
-                        wrapper = "java/lang/Character";
-                        opcodes = ILOAD;
-                        break;
-                    case Type.INT:
-                        wrapper = "java/lang/Integer";
-                        opcodes = ILOAD;
-                        break;
-                    case Type.LONG:
-                        wrapper = "java/lang/Long";
-                        opcodes = LLOAD;
-                        break;
-                    case Type.FLOAT:
-                        wrapper = "java/lang/Float";
-                        opcodes = FLOAD;
-                        break;
-                    case Type.DOUBLE:
-                        wrapper = "java/lang/Double";
-                        opcodes = DLOAD;
-                        break;
-                    default:
-                        mv.visitVarInsn(Opcodes.ALOAD, idx);
-                        break;
-                }
-
-                if (wrapper != null && opcodes >= 0) {
+                String wrapper = OpcodesUtil.getWrapperClass(params[i].getSort());
+                if (wrapper == null) {
+                    mv.visitVarInsn(Opcodes.ALOAD, idx);
+                } else {
+                    int opcodes = OpcodesUtil.getLoadOrStore(params[i].getSort(), true);
                     mv.visitVarInsn(opcodes, idx);
                     mv.visitMethodInsn(INVOKESTATIC, wrapper, "valueOf", "(" + params[i].getDescriptor() + ")L" + wrapper + ";", false);
                 }
@@ -106,6 +74,4 @@ public class ProxyMethodVisitor extends LocalVariablesSorter implements org.obje
             }
         }
     }
-
-
 }

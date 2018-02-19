@@ -8,8 +8,6 @@ import java.util.Stack;
 
 /**
  * @author zacconding
- * @Date 2018-02-18
- * @GitHub : https://github.com/zacscoding
  */
 public class TransactionTrace {
 
@@ -54,16 +52,6 @@ public class TransactionTrace {
             System.out.println("[ERROR] called getLastTraceMethod. but there is no MethodContext");
             return;
         }
-        System.out.println("1");
-        System.out.println("@@TransactionTrace::appendReturnValue is called");
-        System.out.println("2");
-        if (value == null) {
-            System.out.println("value is null");
-        } else {
-            System.out.println("value is not null");
-            System.out.println(value.toString());
-        }
-        System.out.println(value);
 
         // set return value & execute time
         methodCtx.setReturnValue(parseReturnValue(value));
@@ -107,15 +95,15 @@ public class TransactionTrace {
         String depsVal = "";
         // append deps
         for (int i = 0; i < deps; i++) {
-            depsVal += "  ";
+            depsVal += "|  ";
         }
 
         MethodContext methodContext = methodNode.getData();
-        sb.append(depsVal).append(methodContext.getId()).append("[").append(methodContext.getExcuteTime()).append("ms] : ").append(methodContext.getReturnValue()).append(newLine);
+        sb.append(depsVal).append("+--").append(methodContext.getId()).append("[").append(methodContext.getExcuteTime()).append("ms] : ").append(methodContext.getReturnValue()).append(newLine);
         List<String> params = methodContext.getParams();
         if (params != null && params.size() > 0) {
             for (String param : params) {
-                sb.append(depsVal).append(param).append(newLine);
+                sb.append(depsVal).append(" -- ").append(param).append(newLine);
             }
         }
 

@@ -1,7 +1,5 @@
 package com.zaccoding.tracer.agent;
 
-import com.google.gson.Gson;
-import com.zaccoding.tracer.agent.trace.TransactionTrace;
 import java.lang.instrument.Instrumentation;
 
 /**

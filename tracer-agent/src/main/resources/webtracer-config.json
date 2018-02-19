@@ -2,7 +2,7 @@
   "class-proxies": [
     {
       // check class name
-      "class-name": "com/zaccoding/controller/FrontController",
+      "class-name": "com/zaccoding",
       // check class type [startsWith, endsWith, equals, contains]
       "invoke-type": "equals",
       // return class-name.invoke(origin-class-name);

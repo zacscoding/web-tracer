@@ -11,8 +11,6 @@ import java.security.ProtectionDomain;
 
 /**
  * @author zacconding
- * @Date 2018-01-21
- * @GitHub : https://github.com/zacscoding
  */
 public class AgentTransformer implements ClassFileTransformer {
 
@@ -54,6 +52,8 @@ public class AgentTransformer implements ClassFileTransformer {
                 ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
                 cr.accept(new ProxyClassVisitor(cw, className, classProxy), ClassReader.EXPAND_FRAMES);
                 classfileBuffer = cw.toByteArray();
+
+                // write modified class file
                 WriteClassFileForDev.writeByteCode(classfileBuffer, className);
             }
         } catch (Throwable t) {
