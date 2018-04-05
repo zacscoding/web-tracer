@@ -21,7 +21,22 @@ public class WriteClassFileForDev {
     /**
      * Class의 bytecode변경이 존재하면, D:classes폴더에 클래스 파일을 쓴다. (디컴파일러 인텔리j, 이클립스, jd-gui 등으로 확인하면 됨)
      */
-    public static void writeByteCode(byte[] bytes, String className) {
+
+    public static void writeByteCode(byte[] bytes, final String className) {
+        if (bytes == null || bytes.length == 0) {
+            return;
+        }
+        final byte[] copy = new byte[bytes.length];
+        System.arraycopy(bytes, 0, copy, 0, bytes.length);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                writeByteCodeInternal(copy, className);
+            }
+        }).start();
+    }
+
+    private static void writeByteCodeInternal(byte[] bytes, String className) {
         if (hasError) {
             System.out.println("Cant write class file");
             return;

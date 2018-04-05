@@ -20,6 +20,8 @@ public class AgentTransformer implements ClassFileTransformer {
                 return null;
             }
 
+            WriteClassFileForDev.writeByteCode(classfileBuffer, className);
+
             // set class desc
             final ClassDesc classDesc = new ClassDesc();
             ClassReader cr = new ClassReader(classfileBuffer);
@@ -45,6 +47,7 @@ public class AgentTransformer implements ClassFileTransformer {
             if (Configurer.INSTANCE.isError()) {
                 return classfileBuffer;
             }
+
             // check exist class proxy config
             ProxyConfigurer.ClassProxy classProxy = Configurer.INSTANCE.getProxyConfigurer().getClassProxy(className);
             if (classProxy != null) {
@@ -54,7 +57,6 @@ public class AgentTransformer implements ClassFileTransformer {
                 classfileBuffer = cw.toByteArray();
 
                 // write modified class file
-                WriteClassFileForDev.writeByteCode(classfileBuffer, className);
             }
         } catch (Throwable t) {
             t.printStackTrace();

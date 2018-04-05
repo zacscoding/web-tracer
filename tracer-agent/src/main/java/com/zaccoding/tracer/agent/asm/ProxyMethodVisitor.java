@@ -3,6 +3,7 @@ package com.zaccoding.tracer.agent.asm;
 import com.zaccoding.tracer.agent.ProxyConfigurer;
 import com.zaccoding.tracer.agent.trace.TransactionTrace;
 import com.zaccoding.tracer.util.OpcodesUtil;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -12,6 +13,8 @@ import org.objectweb.asm.commons.LocalVariablesSorter;
  * @author zacconding
  */
 public class ProxyMethodVisitor extends LocalVariablesSorter implements org.objectweb.asm.Opcodes {
+
+    private Label startFinally = new Label();
 
     private ProxyConfigurer.MethodProxy methodProxy;
     private String id;
